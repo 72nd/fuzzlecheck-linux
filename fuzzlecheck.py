@@ -13,8 +13,7 @@ APPLICATIONS_FOLDER = "~/.local/share/applications/"
 IMG_JAVA_LOCATION = "Fuzzlecheck 4/Fuzzlecheck 4.app/Contents/Java"
 IMG_ICON_LOCATION = "Fuzzlecheck 4/Fuzzlecheck 4.app/Contents/Resources/icon_mac.icns"
 IMG_INFO_LOCATION = "Fuzzlecheck 4/Fuzzlecheck 4.app/Contents/Info.plist"
-MANIFEST_TEMPLATE = """
-Manifest-Version: 1.0
+MANIFEST_TEMPLATE = """Manifest-Version: 1.0
 JavaFX-Version: 8.0
 Implementation-Version: {version}
 Permissions: sandbox
@@ -30,6 +29,7 @@ import subprocess
 import sys
 from tempfile import TemporaryDirectory
 from typing import List
+import zipfile
 
 def get_img_path() -> Path:
     """Gets the path of the Mac installation image from the command line arguments. Fails
@@ -71,7 +71,8 @@ def inject_manifest(temp_folder: Path, application_folder: Path):
     jars = get_jars(application_folder)
     content = MANIFEST_TEMPLATE.format(version = version, classpath = " ".join(jars))
 
-    print(content)
+    with zipfile.ZipFile(application_folder.joinpath("Fuzzlecheck.jar"), mode = 'a') as jar:
+        jar.writestr("META-INF/MANIFEST.MF", content)
 
 def get_fuzzlecheck_version(temp_folder: Path) -> str:
     """Parses the `Info.plist` file and returns the version number of Fuzzlecheck."""
@@ -92,7 +93,6 @@ if __name__ == "__main__":
     temp_folder = TemporaryDirectory()
     temp_folder_path = Path(temp_folder.name)
     application_folder = temp_folder_path.joinpath("fuzzlecheck")
-    print(temp_folder)
 
     img = get_img_path()
     extract_image(img, temp_folder_path)
