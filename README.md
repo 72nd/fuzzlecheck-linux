@@ -11,14 +11,15 @@
 
 You need to have the following packages installed on your System:
 
-- 7z
-- Python 3
-- A current version of the Java Runtime Environment (for me OpenJDK JRE 14 works)
+- _7z_ to extract the content of the Image.
+- _Python 3_ to run the script itself.
+- _Icnsutils_ to convert the icon for the desktop starter.
+- A current version of the _Java Runtime Environment_ (OpenJDK JRE 14 works for me) to run Fuzzlecheck in the end.
 
 For Ubuntu:
 
 ```shell script
-sudo apt install openjdk-14-jre p7zip-full python3
+sudo apt install openjdk-14-jre p7zip-full python3 icnsutils
 ``` 
 
 ### Get the application image
