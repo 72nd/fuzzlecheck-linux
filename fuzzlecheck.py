@@ -9,8 +9,14 @@
 DESTINATION = "~/.local/bin/fuzzlecheck/"
 APPLICATIONS_FOLDER = "~/.local/share/applications/"
 
-import sys
+# Internal constants, do not change.
+IMG_JAVA_LOCATION = "Fuzzlecheck 4/Fuzzlecheck 4.app/Contents/Java"
+
 from pathlib import Path
+import shutil
+import subprocess
+import sys
+from tempfile import TemporaryDirectory
 
 def get_img_path() -> Path:
     args = sys.argv
@@ -20,11 +26,31 @@ def get_img_path() -> Path:
         sys.exit("More arguments provided than needed")
     rsl = Path(args[1])
     if not rsl.exists():
-        sys.exit("Given input image ({}) doesn't exist.".format(args[1]))
+        sys.exit("Given dmg image ({}) doesn't exist.".format(args[1]))
     return rsl
 
+def extract_image(img: Path, temp_folder: Path):
+    try:
+        subprocess.check_output(["7z", "x", img, "-o{}".format(temp_folder)])
+    except subprocess.CalledProcessError as e:
+        print("Some error occurred while the execution of 7z. \"HFS Headers Errors\" can be ignored.\n---{}\n---".format(e.output))
+
+def build_application_folder(temp_folder: Path, application_folder: Path):
+    java_folder = temp_folder.joinpath(Path(IMG_JAVA_LOCATION))
+    shutil.copytree(java_folder, application_folder)
+    print(java_folder)
+
 if __name__ == "__main__":
+    temp_folder = TemporaryDirectory()
+    temp_folder_path = Path(temp_folder.name)
+    application_folder = temp_folder_path.joinpath("fuzzlecheck")
+    print(temp_folder)
+
     img = get_img_path()
-    print(img)
+    extract_image(img, temp_folder_path)
+    build_application_folder(temp_folder_path, application_folder)
+
+    input()
+    temp_folder.cleanup()
 
 
