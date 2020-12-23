@@ -49,6 +49,6 @@ Then run the script with the path to the Fuzzlecheck dmg image.
 
 ## How does this works?
 
-The Application bundles a number of Jar files which can be executed by any System the Jave Runtime is available. This script extracts the needed JAR files from the dmg file using 7z. It then injects a custom written [Manifest File](https://docs.oracle.com/javase/tutorial/deployment/jar/manifestindex.html) into the main JAR. Afterwards the application will be installed to your system and a application launcher (.desktop file) will be added.
+The Application bundles a number of Jar files which can be executed by any System the Jave Runtime is available. This script extracts the needed JAR files from the dmg file using 7z. It then generates a custom [Manifest File](https://docs.oracle.com/javase/tutorial/deployment/jar/manifestindex.html) which gets injected into the main JAR. Afterwards the application will be installed to your system and a application launcher (.desktop file) will be added.
 
 
