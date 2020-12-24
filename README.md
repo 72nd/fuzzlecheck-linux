@@ -2,7 +2,7 @@
 
 ## Introduction 
  
-[Fuzzlecheck](https://www.fuzzlecheck.de/index/EN/index.html) is a film preproduction management software which is quiet popular in Germany. Officially it only runs on Windows or Mac. As it's only a bundled Java Application, it can also runs on Linux. I've written a simple Python script to extract the files from the Mac Image and install them on your Linux box.
+[Fuzzlecheck](https://www.fuzzlecheck.de/index/EN/index.html) is a film preproduction management software which is quiet popular in Germany. Officially it only runs on Windows or Mac. But as it's only a bundled Java Application, it can also runs on Linux. I've written a simple Python script to extract the files from the Mac Image and install them on your Linux box.
 
 
 ## Usage

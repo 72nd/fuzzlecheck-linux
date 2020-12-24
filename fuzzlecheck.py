@@ -19,7 +19,7 @@ Implementation-Version: {version}
 Permissions: sandbox
 Main-Class: com.fuzzlecheck.Fuzzlecheck
 Implementation-Vendor: Milieufilm
-Class-Path: {classpath}
+{classpath}
 """
 
 from pathlib import Path
@@ -68,8 +68,8 @@ def build_icon(temp_folder: Path):
 def inject_manifest(temp_folder: Path, application_folder: Path):
     """Generates and injects the manifest file into `Fuzzlecheck.jar`."""
     version = get_fuzzlecheck_version(temp_folder)
-    jars = get_jars(application_folder)
-    content = MANIFEST_TEMPLATE.format(version = version, classpath = " ".join(jars))
+    classpath = get_classpath(application_folder)
+    content = MANIFEST_TEMPLATE.format(version = version, classpath = classpath)
 
     with zipfile.ZipFile(application_folder.joinpath("Fuzzlecheck.jar"), mode = 'a') as jar:
         jar.writestr("META-INF/MANIFEST.MF", content)
@@ -81,13 +81,28 @@ def get_fuzzlecheck_version(temp_folder: Path) -> str:
     pattern = re.compile(r"<key>CFBundleVersion</key>\n<string>(.*)</string>")
     return pattern.search(info).group(1)
 
-def get_jars(application_folder: Path) -> List[str]:
-    """Returns a list with all JAR files in the application folder. Used to generate the Class-Path
-    in the manifest file."""
-    rsl = []
+def get_classpath(application_folder: Path) -> str:
+    """Returns the Class-Path for the JAR's manifest file. This is determined by reading the names of all JAR files in
+    the application folder. A line in a manifest file is allowed to have a length of 72 bytes at max."""
+    items  = []
     for item in application_folder.iterdir():
-        rsl.append(item.name)
-    return rsl
+        items.append(item.name + " ")
+    items = sorted(items)
+
+    rsl = []
+    line = "Class-Path: "
+    for item in items:
+        if item == "Fuzzlecheck.jar":
+            continue
+        for char in item:
+            if len(line.encode("UTF-8")) == 70:
+                rsl.append(line)
+                line = " "
+            line += char
+
+    with open("/tmp/dump", "w") as f:
+        f.write("\n".join(rsl))
+    return "\n".join(rsl)
 
 if __name__ == "__main__":
     temp_folder = TemporaryDirectory()
