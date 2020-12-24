@@ -23,6 +23,12 @@ For Ubuntu:
 sudo apt install openjdk-14-jre p7zip-full python3 icnsutils
 ``` 
 
+For Fedora:
+
+```shell script
+sudo dnf install java-latest-openjdk p7zip python3 libicns-utils
+```  
+
 ### Get the application image
 
 Download the current Mac version of Fuzzlecheck from [here](http://fuz4downloads.fuzzlecheck.com/?linkOSX=Fuzzlecheck) and save it somewhere on your system.
@@ -42,6 +48,7 @@ You can change the installation destination by modifying the constant in the scr
 - `DESTINATION`. Path to the folder where the Fuzzlecheck folder will be copied to. Defaults to `~/.local/bin/fuzzlecheck/`.
 - `APPLICATIONS_FOLDER`. Path to the applications folder where the `fuzzlecheck.desktop` will be created. Defaults to `~/.local/share/applications/`.
 - `ICONS_HICOLOR_FOLDER`. Path to the location of the hicolor icon folder. Defaults to `~/.local/share/icons/hicolor/`
+- `GTK_THEME`. Some GTK dark-themes clash with the interface of Fuzzlecheck if the constant isn't empty the application will be started with the given theme. Defaults to `Adwaita`.
 
 Then run the script with the path to the Fuzzlecheck dmg image.
 

@@ -9,6 +9,7 @@
 DESTINATION = "~/.local/bin/fuzzlecheck/"
 APPLICATIONS_FOLDER = "~/.local/share/applications/"
 ICONS_HICOLOR_FOLDER = "~/.local/share/icons/hicolor/"
+GTK_THEME = "Adwaita"
 
 # Internal constants, do not change.
 IMG_JAVA_LOCATION = "Fuzzlecheck 4/Fuzzlecheck 4.app/Contents/Java"
@@ -28,7 +29,7 @@ Version={version}
 Name=Fuzzlecheck 4	
 GenericName=Film Preproduction
 Comment=Scheduling your shoot has never been easier.
-Exec=java -jar {path}
+Exec={env}java -jar {path}
 Icon=fuzzlecheck
 Terminal=false
 Type=Application
@@ -132,9 +133,12 @@ def install_icons(temp_folder: Path):
 
 def install_desktop_file(version: str):
     """Writes the .desktop file to the applications folder."""
+    env = ""
+    if GTK_THEME != "":
+        env = "env GTK_THEME={} ".format(GTK_THEME)
     path = Path(DESTINATION).expanduser().joinpath("Fuzzlecheck.jar")
     with open(desktop_file_path(), "w") as f:
-        f.write(DESKTOP_TEMPLATE.format(version = version, path = path))
+        f.write(DESKTOP_TEMPLATE.format(version = version, env = env, path = path))
 
 def source_icon_path(temp_folder: Path, size: int) -> Path:
     """Returns the temporary location for a given icon size."""
