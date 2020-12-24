@@ -34,6 +34,7 @@ Icon=fuzzlecheck
 Terminal=false
 Type=Application
 """
+JAVA_SWING_CONFIG="-Dawt.useSystemAAFontSettings=on -Dswing.aatext=true -Dswing.defaultlaf=com.sun.java.swing.plaf.gtk.GTKLookAndFeel -Dswing.crossplatformlaf=com.sun.java.swing.plaf.gtk.GTKLookAndFeel"
 
 import os
 from pathlib import Path
@@ -135,7 +136,7 @@ def install_desktop_file(version: str):
     """Writes the .desktop file to the applications folder."""
     env = ""
     if GTK_THEME != "":
-        env = "env GTK_THEME={} ".format(GTK_THEME)
+        env = "env _JAVA_OPTIONS='{}' GTK_THEME={} ".format(GTK_THEME)
     path = Path(DESTINATION).expanduser().joinpath("Fuzzlecheck.jar")
     with open(desktop_file_path(), "w") as f:
         f.write(DESKTOP_TEMPLATE.format(version = version, env = env, path = path))
