@@ -6,13 +6,15 @@
 # the developers of Fuzzlecheck.
 
 # Modify this constants to match your needs.
-DESTINATION = "~/.local/bin/fuzzlecheck/"
+DESTINATION = "~/.local/bin/"
 APPLICATIONS_FOLDER = "~/.local/share/applications/"
+ICONS_HICOLOR_FOLDER = "~/.local/share/icons/hicolor/"
 
 # Internal constants, do not change.
 IMG_JAVA_LOCATION = "Fuzzlecheck 4/Fuzzlecheck 4.app/Contents/Java"
 IMG_ICON_LOCATION = "Fuzzlecheck 4/Fuzzlecheck 4.app/Contents/Resources/icon_mac.icns"
 IMG_INFO_LOCATION = "Fuzzlecheck 4/Fuzzlecheck 4.app/Contents/Info.plist"
+ICON_SIZES = [16, 128, 256, 512]
 MANIFEST_TEMPLATE = """Manifest-Version: 1.0
 JavaFX-Version: 8.0
 Implementation-Version: {version}
@@ -21,7 +23,18 @@ Main-Class: com.fuzzlecheck.Fuzzlecheck
 Implementation-Vendor: Milieufilm
 {classpath}
 """
+DESKTOP_TEMPLATE = """[Desktop Entry]
+Version={version}
+Name=Fuzzlecheck 4	
+GenericName=Film Preproduction
+Comment=Scheduling your shoot has never been easier.
+Exec=java -jar {path}
+Icon=fuzzlecheck
+Terminal=false
+Type=Application
+"""
 
+import os
 from pathlib import Path
 import re
 import shutil
@@ -99,12 +112,32 @@ def get_classpath(application_folder: Path) -> str:
                 rsl.append(line)
                 line = " "
             line += char
-
-    with open("/tmp/dump", "w") as f:
-        f.write("\n".join(rsl))
     return "\n".join(rsl)
 
+def install_application(application_folder: Path):
+    """Copies the application folder to the given location."""
+
+def install_icons(temp_folder: Path):
+    """Copies the extracted icons to the given hicolor icons location."""
+    for size in ICON_SIZES:
+        source = temp_folder.joinpath("icon_mac_{size}x{size}x32.png".format(size = size))
+        destination = Path(ICONS_HICOLOR_FOLDER).expanduser().joinpath("{size}x{size}/apps/fuzzlecheck.png".format(size = size))
+        shutil.copyfile(source, destination)
+
+def uninstall_on_parameter():
+    """Uninstalls Fuzzlecheck if the argument uninstall is given by the user."""
+    if len(sys.argv) != 2 or sys.argv[1] != "uninstall":
+        return
+
+    for size in ICON_SIZES:
+        os.remove(Path(ICONS_HICOLOR_FOLDER).expanduser().joinpath("{size}x{size}/apps/fuzzlecheck.png".format(size = size)))
+
+    print("Fuzzlecheck was removed.")
+    sys.exit(0)
+
 if __name__ == "__main__":
+    uninstall_on_parameter()
+
     temp_folder = TemporaryDirectory()
     temp_folder_path = Path(temp_folder.name)
     application_folder = temp_folder_path.joinpath("fuzzlecheck")
@@ -114,6 +147,9 @@ if __name__ == "__main__":
     build_application_folder(temp_folder_path, application_folder)
     build_icon(temp_folder_path)
     inject_manifest(temp_folder_path, application_folder)
+
+    install_application(application_folder)
+    install_icons(temp_folder_path)
 
     input()
     temp_folder.cleanup()

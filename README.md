@@ -38,13 +38,22 @@ cd fuzzlecheck-linux
 
 You can change the installation destination by modifying the constant in the script file.
 
-- `DESTINATION`. Path to the folder where the Fuzzlecheck files will be copied to. Defaults to `~/.local/bin/fuzzlecheck/`.
+- `DESTINATION`. Path to the folder where the Fuzzlecheck folder will be copied to. Defaults to `~/.local/bin/`.
 - `APPLICATIONS_FOLDER`. Path to the applications folder where the `fuzzlecheck.desktop` will be created. Defaults to `~/.local/share/applications/`.
+- `ICONS_HICOLOR_FOLDER`. Path to the location of the hicolor icon folder. Defaults to `~/.local/share/icons/hicolor/`
 
 Then run the script with the path to the Fuzzlecheck dmg image.
 
 ```shell script
 ./fuzzlecheck.py path/to/image/fuz_mac_setup_4.X.X.dmg
+```
+
+## Uninstall
+
+You can remove Fuzzlecheck by calling
+
+```shell script
+.fuzzlecheck.py uninstall
 ```
 
 ## How does this works?
