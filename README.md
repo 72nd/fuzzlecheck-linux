@@ -2,7 +2,7 @@
 
 ## Introduction 
  
-[Fuzzlecheck](https://www.fuzzlecheck.de/index/EN/index.html) is a film preproduction management software which is quiet popular in Germany. Officially it only runs on Windows or Mac. But as it's only a bundled Java Application, it can also runs on Linux. I've written a simple Python script to extract the files from the Mac Image and install them on your Linux box.
+[Fuzzlecheck](https://www.fuzzlecheck.de/index/EN/index.html) is a film preproduction management software which is quiet popular in Germany. Officially it only runs on Windows or Mac. But as it's only a bundled Java Application, it can also runs on Linux. I've written a simple Python script to extract the files from the Mac Image and install them on your Linux box. Further a `.desktop` entry is added so you can use the application like any other.
 
 
 ## Usage
@@ -14,6 +14,7 @@ You need to have the following packages installed on your System:
 - _7z_ to extract the content of the Image.
 - _Python 3_ to run the script itself.
 - _Icnsutils_ to convert the icon for the desktop starter.
+- _Imagemagick_ to scale the icons.
 - A current version of the _Java Runtime Environment_ (OpenJDK JRE 14 works for me) to run Fuzzlecheck in the end.
 
 For Ubuntu:
@@ -38,7 +39,7 @@ cd fuzzlecheck-linux
 
 You can change the installation destination by modifying the constant in the script file.
 
-- `DESTINATION`. Path to the folder where the Fuzzlecheck folder will be copied to. Defaults to `~/.local/bin/`.
+- `DESTINATION`. Path to the folder where the Fuzzlecheck folder will be copied to. Defaults to `~/.local/bin/fuzzlecheck/`.
 - `APPLICATIONS_FOLDER`. Path to the applications folder where the `fuzzlecheck.desktop` will be created. Defaults to `~/.local/share/applications/`.
 - `ICONS_HICOLOR_FOLDER`. Path to the location of the hicolor icon folder. Defaults to `~/.local/share/icons/hicolor/`
 

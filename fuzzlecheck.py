@@ -6,7 +6,7 @@
 # the developers of Fuzzlecheck.
 
 # Modify this constants to match your needs.
-DESTINATION = "~/.local/bin/"
+DESTINATION = "~/.local/bin/fuzzlecheck/"
 APPLICATIONS_FOLDER = "~/.local/share/applications/"
 ICONS_HICOLOR_FOLDER = "~/.local/share/icons/hicolor/"
 
@@ -14,7 +14,7 @@ ICONS_HICOLOR_FOLDER = "~/.local/share/icons/hicolor/"
 IMG_JAVA_LOCATION = "Fuzzlecheck 4/Fuzzlecheck 4.app/Contents/Java"
 IMG_ICON_LOCATION = "Fuzzlecheck 4/Fuzzlecheck 4.app/Contents/Resources/icon_mac.icns"
 IMG_INFO_LOCATION = "Fuzzlecheck 4/Fuzzlecheck 4.app/Contents/Info.plist"
-ICON_SIZES = [16, 128, 256, 512]
+ICON_SIZES = [16, 24, 32, 48, 64, 128, 256, 512]
 MANIFEST_TEMPLATE = """Manifest-Version: 1.0
 JavaFX-Version: 8.0
 Implementation-Version: {version}
@@ -77,10 +77,12 @@ def build_icon(temp_folder: Path):
         subprocess.check_output(["icns2png", "-x", source, "-o", temp_folder])
     except subprocess.CalledProcessError as e:
         sys.exit(e.output)
+    subprocess.call(["convert", source_icon_path(temp_folder, 16), "-resize", "24x24", source_icon_path(temp_folder, 24)])
+    subprocess.call(["convert", source_icon_path(temp_folder, 128), "-resize", "48x48", source_icon_path(temp_folder, 48)])
+    subprocess.call(["convert", source_icon_path(temp_folder, 128), "-resize", "64x64", source_icon_path(temp_folder, 64)])
 
-def inject_manifest(temp_folder: Path, application_folder: Path):
+def inject_manifest(temp_folder: Path, application_folder: Path, version: str):
     """Generates and injects the manifest file into `Fuzzlecheck.jar`."""
-    version = get_fuzzlecheck_version(temp_folder)
     classpath = get_classpath(application_folder)
     content = MANIFEST_TEMPLATE.format(version = version, classpath = classpath)
 
@@ -116,21 +118,46 @@ def get_classpath(application_folder: Path) -> str:
 
 def install_application(application_folder: Path):
     """Copies the application folder to the given location."""
+    destination = Path(DESTINATION).expanduser()
+    if destination.exists():
+        sys.exit("The destination folder {} already exists. Use `fuzzlecheck.py uninstall` to remove an existing installation.".format(destination))
+    shutil.copytree(application_folder, destination)
 
 def install_icons(temp_folder: Path):
     """Copies the extracted icons to the given hicolor icons location."""
     for size in ICON_SIZES:
-        source = temp_folder.joinpath("icon_mac_{size}x{size}x32.png".format(size = size))
+        source = source_icon_path(temp_folder, size)
         destination = Path(ICONS_HICOLOR_FOLDER).expanduser().joinpath("{size}x{size}/apps/fuzzlecheck.png".format(size = size))
         shutil.copyfile(source, destination)
+
+def install_desktop_file(version: str):
+    """Writes the .desktop file to the applications folder."""
+    path = Path(DESTINATION).expanduser().joinpath("Fuzzlecheck.jar")
+    with open(desktop_file_path(), "w") as f:
+        f.write(DESKTOP_TEMPLATE.format(version = version, path = path))
+
+def source_icon_path(temp_folder: Path, size: int) -> Path:
+    """Returns the temporary location for a given icon size."""
+    return temp_folder.joinpath("icon_mac_{size}x{size}x32.png".format(size = size))
+
+def desktop_file_path() -> Path:
+    """Returns the path to the .desktop file."""
+    return Path(APPLICATIONS_FOLDER).expanduser().joinpath("fuzzlecheck.desktop")
 
 def uninstall_on_parameter():
     """Uninstalls Fuzzlecheck if the argument uninstall is given by the user."""
     if len(sys.argv) != 2 or sys.argv[1] != "uninstall":
         return
 
+    # Application data
+    shutil.rmtree(Path(DESTINATION).expanduser())
+
+    # Icons
     for size in ICON_SIZES:
         os.remove(Path(ICONS_HICOLOR_FOLDER).expanduser().joinpath("{size}x{size}/apps/fuzzlecheck.png".format(size = size)))
+
+    # Desktop entry
+    os.remove(desktop_file_path())
 
     print("Fuzzlecheck was removed.")
     sys.exit(0)
@@ -144,12 +171,15 @@ if __name__ == "__main__":
 
     img = get_img_path()
     extract_image(img, temp_folder_path)
+    version = get_fuzzlecheck_version(temp_folder_path)
+
     build_application_folder(temp_folder_path, application_folder)
     build_icon(temp_folder_path)
-    inject_manifest(temp_folder_path, application_folder)
+    inject_manifest(temp_folder_path, application_folder, version)
 
     install_application(application_folder)
     install_icons(temp_folder_path)
+    install_desktop_file(version)
 
     input()
     temp_folder.cleanup()
