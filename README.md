@@ -26,7 +26,7 @@ sudo apt install openjdk-14-jre p7zip-full python3 icnsutils
 For Fedora:
 
 ```shell script
-sudo dnf install java-latest-openjdk p7zip-plugins python3 libicns-utils
+sudo dnf install java-latest-openjdk java-latest-openjdk-static-libs p7zip-plugins python3 libicns-utils
 ```  
 
 ### Get the application image
