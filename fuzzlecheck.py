@@ -26,7 +26,7 @@ Implementation-Vendor: Milieufilm
 """
 DESKTOP_TEMPLATE = """[Desktop Entry]
 Version={version}
-Name=Fuzzlecheck 4	
+Name=Fuzzlecheck 4
 GenericName=Film Preproduction
 Comment=Scheduling your shoot has never been easier.
 Exec={env}java -jar {path}
@@ -186,7 +186,6 @@ if __name__ == "__main__":
     install_icons(temp_folder_path)
     install_desktop_file(version)
 
-    input()
     temp_folder.cleanup()
 
 
