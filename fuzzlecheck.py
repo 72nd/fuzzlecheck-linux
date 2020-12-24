@@ -26,7 +26,7 @@ Implementation-Vendor: Milieufilm
 """
 DESKTOP_TEMPLATE = """[Desktop Entry]
 Version={version}
-Name=Fuzzlecheck 4	
+Name=Fuzzlecheck 4
 GenericName=Film Preproduction
 Comment=Scheduling your shoot has never been easier.
 Exec={env}java -jar {path}
