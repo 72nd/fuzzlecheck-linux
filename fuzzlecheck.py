@@ -185,7 +185,6 @@ if __name__ == "__main__":
     install_icons(temp_folder_path)
     install_desktop_file(version)
 
-    input()
     temp_folder.cleanup()
 
 
