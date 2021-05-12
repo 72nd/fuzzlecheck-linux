@@ -110,14 +110,20 @@ def build_icon(temp_folder: Path):
 def inject_manifest(temp_folder: Path, application_folder: Path, version: str):
     """Generates and injects the manifest file into `Fuzzlecheck.jar`."""
     classpath = get_classpath(application_folder)
+    print(classpath)
     content = MANIFEST_TEMPLATE.format(version=version, classpath=classpath)
 
-    with zipfile.ZipFile(application_folder.joinpath("Fuzzlecheck.jar"), mode='a') as jar:
+    with zipfile.ZipFile(
+            application_folder.joinpath("Fuzzlecheck.jar"),
+            mode='a'
+    ) as jar:
         jar.writestr("META-INF/MANIFEST.MF", content)
 
 
 def get_fuzzlecheck_version(temp_folder: Path) -> str:
-    """Parses the `Info.plist` file and returns the version number of Fuzzlecheck."""
+    """
+    Parses the `Info.plist` file and returns the version number of Fuzzlecheck.
+    """
     with open(temp_folder.joinpath(IMG_INFO_LOCATION)) as f:
         info = f.read()
     pattern = re.compile(r"<key>CFBundleVersion</key>\n<string>(.*)</string>")
@@ -132,20 +138,15 @@ def get_classpath(application_folder: Path) -> str:
     """
     items = []
     for item in application_folder.iterdir():
+        if item.name == "Fuzzlecheck.jar":
+            continue
         items.append(item.name + " ")
     items = sorted(items)
 
-    rsl = []
-    line = "Class-Path: "
-    for item in items:
-        if item == "Fuzzlecheck.jar":
-            continue
-        for char in item:
-            if len(line.encode("UTF-8")) == 70:
-                rsl.append(line)
-                line = " "
-            line += char
-    return "\n".join(rsl)
+    item_str = "Class-Path: {}".format(" ".join(items))
+    rsl = (item_str[0+i:70+i]
+           for i in range(0, len(item_str.encode("UTF-8")), 70))
+    return "\n ".join(rsl)
 
 
 def install_application(application_folder: Path):
@@ -153,7 +154,7 @@ def install_application(application_folder: Path):
     destination = Path(DESTINATION).expanduser()
     if destination.exists():
         sys.exit(
-            "The destination folder {} already exists. Use `fuzzlecheck.py"
+            "The destination folder {} already exists. Use `fuzzlecheck.py "
             "uninstall` to remove an existing installation.".format(
                 destination
             )
