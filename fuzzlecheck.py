@@ -6,6 +6,16 @@
 # the developers of Fuzzlecheck.
 
 # Modify this constants to match your needs.
+
+import os
+from pathlib import Path
+import re
+import shutil
+import subprocess
+import sys
+from tempfile import TemporaryDirectory
+import zipfile
+
 DESTINATION = "~/.local/bin/fuzzlecheck/"
 APPLICATIONS_FOLDER = "~/.local/share/applications/"
 ICONS_HICOLOR_FOLDER = "~/.local/share/icons/hicolor/"
@@ -34,24 +44,20 @@ Icon=fuzzlecheck
 Terminal=false
 Type=Application
 """
-JAVA_SWING_CONFIG="-Dawt.useSystemAAFontSettings=on -Dswing.aatext=true -Dswing.defaultlaf=com.sun.java.swing.plaf.gtk.GTKLookAndFeel -Dswing.crossplatformlaf=com.sun.java.swing.plaf.gtk.GTKLookAndFeel"
+JAVA_SWING_CONFIG = "-Dawt.useSystemAAFontSettings=on -Dswing.aatext=true -Dswing.defaultlaf=com.sun.java.swing.plaf.gtk.GTKLookAndFeel -Dswing.crossplatformlaf=com.sun.java.swing.plaf.gtk.GTKLookAndFeel"
 
-import os
-from pathlib import Path
-import re
-import shutil
-import subprocess
-import sys
-from tempfile import TemporaryDirectory
-from typing import List
-import zipfile
 
 def get_img_path() -> Path:
-    """Gets the path of the Mac installation image from the command line arguments. Fails
-    with an error if the argument is not present or the given file doesn't exist."""
+    """
+    Gets the path of the Mac installation image from the command line
+    arguments. Fails with an error if the argument is not present or the given
+    file doesn't exist.
+    """
     args = sys.argv
     if len(args) < 2:
-        sys.exit("Please provide the path to the Fuzzlecheck image as argument.")
+        sys.exit(
+            "Please provide the path to the Fuzzlecheck image as argument."
+        )
     if len(args) > 2:
         sys.exit("More arguments provided than needed")
     rsl = Path(args[1])
@@ -59,18 +65,31 @@ def get_img_path() -> Path:
         sys.exit("Given dmg image ({}) doesn't exist.".format(args[1]))
     return rsl
 
+
 def extract_image(img: Path, temp_folder: Path):
-    """Uses 7z to extract the content of the dmg file into the temporary folder."""
+    """
+    Uses 7z to extract the content of the dmg file into the temporary folder.
+    """
     try:
         subprocess.check_output(["7z", "x", img, "-o{}".format(temp_folder)])
     except subprocess.CalledProcessError as e:
-        print("Some error occurred while the execution of 7z. \"HFS Headers Errors\" can be ignored.\n---{}\n---".format(e.output))
+        print(
+            "Some error occurred while the execution of 7z. "
+            "\"HFS Headers Errors\" can be ignored.\n---{}\n---".format(
+                e.output
+            )
+        )
+
 
 def build_application_folder(temp_folder: Path, application_folder: Path):
-    """Copies the relevant files into the fuzzlecheck folder in the temporary folder."""
+    """
+    Copies the relevant files into the fuzzlecheck folder in the temporary
+    folder.
+    """
     java_folder = temp_folder.joinpath(Path(IMG_JAVA_LOCATION))
     shutil.copytree(java_folder, application_folder)
     print(java_folder)
+
 
 def build_icon(temp_folder: Path):
     """Extracts the different icons sizes."""
@@ -79,17 +98,22 @@ def build_icon(temp_folder: Path):
         subprocess.check_output(["icns2png", "-x", source, "-o", temp_folder])
     except subprocess.CalledProcessError as e:
         sys.exit(e.output)
-    subprocess.call(["convert", source_icon_path(temp_folder, 16), "-resize", "24x24", source_icon_path(temp_folder, 24)])
-    subprocess.call(["convert", source_icon_path(temp_folder, 128), "-resize", "48x48", source_icon_path(temp_folder, 48)])
-    subprocess.call(["convert", source_icon_path(temp_folder, 128), "-resize", "64x64", source_icon_path(temp_folder, 64)])
+    subprocess.call(["convert", source_icon_path(temp_folder, 16),
+                     "-resize", "24x24", source_icon_path(temp_folder, 24)])
+    subprocess.call(["convert", source_icon_path(temp_folder, 128),
+                     "-resize", "48x48", source_icon_path(temp_folder, 48)])
+    subprocess.call(["convert", source_icon_path(temp_folder, 128),
+                     "-resize", "64x64", source_icon_path(temp_folder, 64)])
+
 
 def inject_manifest(temp_folder: Path, application_folder: Path, version: str):
     """Generates and injects the manifest file into `Fuzzlecheck.jar`."""
     classpath = get_classpath(application_folder)
-    content = MANIFEST_TEMPLATE.format(version = version, classpath = classpath)
+    content = MANIFEST_TEMPLATE.format(version=version, classpath=classpath)
 
-    with zipfile.ZipFile(application_folder.joinpath("Fuzzlecheck.jar"), mode = 'a') as jar:
+    with zipfile.ZipFile(application_folder.joinpath("Fuzzlecheck.jar"), mode='a') as jar:
         jar.writestr("META-INF/MANIFEST.MF", content)
+
 
 def get_fuzzlecheck_version(temp_folder: Path) -> str:
     """Parses the `Info.plist` file and returns the version number of Fuzzlecheck."""
@@ -98,10 +122,14 @@ def get_fuzzlecheck_version(temp_folder: Path) -> str:
     pattern = re.compile(r"<key>CFBundleVersion</key>\n<string>(.*)</string>")
     return pattern.search(info).group(1)
 
+
 def get_classpath(application_folder: Path) -> str:
-    """Returns the Class-Path for the JAR's manifest file. This is determined by reading the names of all JAR files in
-    the application folder. A line in a manifest file is allowed to have a length of 72 bytes at max."""
-    items  = []
+    """
+    Returns the Class-Path for the JAR's manifest file. This is determined by
+    reading the names of all JAR files in the application folder. A line in a
+    manifest file is allowed to have a length of 72 bytes at max.
+    """
+    items = []
     for item in application_folder.iterdir():
         items.append(item.name + " ")
     items = sorted(items)
@@ -118,19 +146,28 @@ def get_classpath(application_folder: Path) -> str:
             line += char
     return "\n".join(rsl)
 
+
 def install_application(application_folder: Path):
     """Copies the application folder to the given location."""
     destination = Path(DESTINATION).expanduser()
     if destination.exists():
-        sys.exit("The destination folder {} already exists. Use `fuzzlecheck.py uninstall` to remove an existing installation.".format(destination))
+        sys.exit(
+            "The destination folder {} already exists. Use `fuzzlecheck.py"
+            "uninstall` to remove an existing installation.".format(
+                destination
+            )
+        )
     shutil.copytree(application_folder, destination)
+
 
 def install_icons(temp_folder: Path):
     """Copies the extracted icons to the given hicolor icons location."""
     for size in ICON_SIZES:
         source = source_icon_path(temp_folder, size)
-        destination = Path(ICONS_HICOLOR_FOLDER).expanduser().joinpath("{size}x{size}/apps/fuzzlecheck.png".format(size = size))
+        destination = Path(ICONS_HICOLOR_FOLDER).expanduser().joinpath(
+            "{size}x{size}/apps/fuzzlecheck.png".format(size=size))
         shutil.copyfile(source, destination)
+
 
 def install_desktop_file(version: str):
     """Writes the .desktop file to the applications folder."""
@@ -139,15 +176,18 @@ def install_desktop_file(version: str):
         env = "env _JAVA_OPTIONS='{}' GTK_THEME={} ".format(GTK_THEME)
     path = Path(DESTINATION).expanduser().joinpath("Fuzzlecheck.jar")
     with open(desktop_file_path(), "w") as f:
-        f.write(DESKTOP_TEMPLATE.format(version = version, env = env, path = path))
+        f.write(DESKTOP_TEMPLATE.format(version=version, env=env, path=path))
+
 
 def source_icon_path(temp_folder: Path, size: int) -> Path:
     """Returns the temporary location for a given icon size."""
-    return temp_folder.joinpath("icon_mac_{size}x{size}x32.png".format(size = size))
+    return temp_folder.joinpath("icon_mac_{size}x{size}x32.png".format(size=size))
+
 
 def desktop_file_path() -> Path:
     """Returns the path to the .desktop file."""
     return Path(APPLICATIONS_FOLDER).expanduser().joinpath("fuzzlecheck.desktop")
+
 
 def uninstall_on_parameter():
     """Uninstalls Fuzzlecheck if the argument uninstall is given by the user."""
@@ -159,13 +199,15 @@ def uninstall_on_parameter():
 
     # Icons
     for size in ICON_SIZES:
-        os.remove(Path(ICONS_HICOLOR_FOLDER).expanduser().joinpath("{size}x{size}/apps/fuzzlecheck.png".format(size = size)))
+        os.remove(Path(ICONS_HICOLOR_FOLDER).expanduser().joinpath(
+            "{size}x{size}/apps/fuzzlecheck.png".format(size=size)))
 
     # Desktop entry
     os.remove(desktop_file_path())
 
     print("Fuzzlecheck was removed.")
     sys.exit(0)
+
 
 if __name__ == "__main__":
     uninstall_on_parameter()
@@ -187,5 +229,3 @@ if __name__ == "__main__":
     install_desktop_file(version)
 
     temp_folder.cleanup()
-
-
