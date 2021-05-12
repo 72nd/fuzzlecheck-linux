@@ -45,7 +45,7 @@ Icon=fuzzlecheck
 Terminal=false
 Type=Application
 """
-JAVA_SWING_CONFIG = "-Dawt.useSystemAAFontSettings=on -Dswing.aatext=true -Dswing.defaultlaf=com.sun.java.swing.plaf.gtk.GTKLookAndFeel -Dswing.crossplatformlaf=com.sun.java.swing.plaf.gtk.GTKLookAndFeel"
+JAVA_SWING_CONFIG = "-Dawt.useSystemAAFontSettings=on -Dswing.aatext=true -Dswing.defaultlaf=com.sun.java.swing.plaf.motif.MotifLookAndFeel -Dswing.crossplatformlaf=com.sun.java.swing.plaf.motif.MotifLookAndFeel"
 
 
 def get_img_path() -> Path:

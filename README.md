@@ -2,7 +2,9 @@
 
 ## Introduction 
  
-[Fuzzlecheck](https://www.fuzzlecheck.de/index/EN/index.html) is a film preproduction management software which is quiet popular in Germany. Officially it only runs on Windows or Mac. But as it's only a bundled Java Application, it can also runs on Linux. I've written a simple Python script to extract the files from the Mac Image and install them on your Linux box. Further a `.desktop` entry is added so you can use the application like any other.
+[Fuzzlecheck](https://www.fuzzlecheck.de/index/EN/index.html) is a film preproduction management software which is quiet popular in Germany. Officially it only runs on Windows or Mac. But as it's only a bundled Java Application, it also runs on Linux. I've written a simple Python script to extract the files from the Mac Image and install them on your Linux box. Further a `.desktop` entry is added so you can use the application like any other.
+
+**Disclaimer:** This software comes without any warranty. Be aware of the potential danger of loosing your (expensive) Fuzzlecheck software-key.
 
 
 ## Usage
@@ -70,3 +72,7 @@ You can remove Fuzzlecheck by calling
 The Application bundles a number of Jar files which can be executed by any System the Jave Runtime is available. This script extracts the needed JAR files from the dmg file using 7z. It then generates a custom [Manifest File](https://docs.oracle.com/javase/tutorial/deployment/jar/manifestindex.html) which gets injected into the main JAR. Afterwards the application will be installed to your system and a application launcher (.desktop file) will be added.
 
 
+# Todo
+
+- [ ] Use argparse instead of constants in the scripts (as normal peoples tend to do).
+- [ ] Use the [FlatLeafe](https://www.formdev.com/flatlaf/#download) theme.
