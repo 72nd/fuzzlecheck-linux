@@ -20,6 +20,7 @@ DESTINATION = "~/.local/bin/fuzzlecheck/"
 APPLICATIONS_FOLDER = "~/.local/share/applications/"
 ICONS_HICOLOR_FOLDER = "~/.local/share/icons/hicolor/"
 GTK_THEME = "Adwaita"
+JAVA_EXECUTABLE = "/usr/lib/jvm/jre-1.8.0/bin/java"
 
 # Internal constants, do not change.
 IMG_JAVA_LOCATION = "Fuzzlecheck 4/Fuzzlecheck 4.app/Contents/Java"
@@ -39,7 +40,7 @@ Version={version}
 Name=Fuzzlecheck 4
 GenericName=Film Preproduction
 Comment=Scheduling your shoot has never been easier.
-Exec={env}java -jar {path}
+Exec={env}{java} -jar {path}
 Icon=fuzzlecheck
 Terminal=false
 Type=Application
@@ -173,15 +174,20 @@ def install_desktop_file(version: str):
     """Writes the .desktop file to the applications folder."""
     env = ""
     if GTK_THEME != "":
-        env = "env _JAVA_OPTIONS='{}' GTK_THEME={} ".format(GTK_THEME)
+        env = f"env JAVA_OPTIONS='{JAVA_SWING_CONFIG}' GTK_THEME={GTK_THEME} "
     path = Path(DESTINATION).expanduser().joinpath("Fuzzlecheck.jar")
     with open(desktop_file_path(), "w") as f:
-        f.write(DESKTOP_TEMPLATE.format(version=version, env=env, path=path))
+        f.write(DESKTOP_TEMPLATE.format(
+            version=version,
+            env=env,
+            java=JAVA_EXECUTABLE,
+            path=path
+        ))
 
 
 def source_icon_path(temp_folder: Path, size: int) -> Path:
     """Returns the temporary location for a given icon size."""
-    return temp_folder.joinpath("icon_mac_{size}x{size}x32.png".format(size=size))
+    return temp_folder.joinpath(f"icon_mac_{size}x{size}x32.png")
 
 
 def desktop_file_path() -> Path:
@@ -190,7 +196,9 @@ def desktop_file_path() -> Path:
 
 
 def uninstall_on_parameter():
-    """Uninstalls Fuzzlecheck if the argument uninstall is given by the user."""
+    """
+    Uninstalls Fuzzlecheck if the argument uninstall is given by the user.
+    """
     if len(sys.argv) != 2 or sys.argv[1] != "uninstall":
         return
 

@@ -15,18 +15,18 @@ You need to have the following packages installed on your System:
 - _Python 3_ to run the script itself.
 - _Icnsutils_ to convert the icon for the desktop starter.
 - _Imagemagick_ to scale the icons.
-- A current version of the _Java Runtime Environment_ (OpenJDK JRE 14 works for me) to run Fuzzlecheck in the end.
+- _Java Runtime Environment 8_ for running the application in the end. Later JRE's won't work as Fuzzlecheck uses the (since JRE 9) depreciated `sun.util.calendar.ZoneInfo` class.
 
 For Ubuntu:
 
 ```shell script
-sudo apt install openjdk-14-jre p7zip-full python3 icnsutils
+sudo apt install openjdk-8-jre p7zip-full python3 icnsutils
 ``` 
 
 For Fedora:
 
 ```shell script
-sudo dnf install java-latest-openjdk java-latest-openjdk-static-libs p7zip-plugins python3 libicns-utils
+sudo dnf install java-1.8.0-openjdk p7zip-plugins python3 libicns-utils
 ```  
 
 ### Get the application image
@@ -49,6 +49,7 @@ You can change the installation destination by modifying the constant in the scr
 - `APPLICATIONS_FOLDER`. Path to the applications folder where the `fuzzlecheck.desktop` will be created. Defaults to `~/.local/share/applications/`.
 - `ICONS_HICOLOR_FOLDER`. Path to the location of the hicolor icon folder. Defaults to `~/.local/share/icons/hicolor/`
 - `GTK_THEME`. Some GTK dark-themes clash with the interface of Fuzzlecheck if the constant isn't empty the application will be started with the given theme. Defaults to `Adwaita`.
+- `JAVA_EXECUTABLE`. Path to the `java` executable for running the application. As Fuzzlecheck relies on JRE 8 (see above) you may specify this to the JRE 8 executable. Defaults to `/usr/lib/jvm/jre-1.8.0/bin/java`
 
 Then run the script with the path to the Fuzzlecheck dmg image.
 
