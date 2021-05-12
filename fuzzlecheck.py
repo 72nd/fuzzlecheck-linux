@@ -175,7 +175,7 @@ def install_desktop_file(version: str):
     """Writes the .desktop file to the applications folder."""
     env = ""
     if GTK_THEME != "":
-        env = f"env JAVA_OPTIONS='{JAVA_SWING_CONFIG}' GTK_THEME={GTK_THEME} "
+        env = f"env _JAVA_OPTIONS='{JAVA_SWING_CONFIG}' GTK_THEME={GTK_THEME} "
     path = Path(DESTINATION).expanduser().joinpath("Fuzzlecheck.jar")
     with open(desktop_file_path(), "w") as f:
         f.write(DESKTOP_TEMPLATE.format(
